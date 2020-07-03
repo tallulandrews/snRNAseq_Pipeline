@@ -2,6 +2,7 @@
 auto_anno_dir = "/cluster/projects/macparland/TA/AutoAnnotation"
 script_dir <- "~/scripts/LiverMap2.0/"
 source(paste(script_dir, "Setup_autoannotation.R", sep="/"))
+source("~/scripts/LiverMap2.0/Colour_Scheme.R")
 set.seed(8291)
 
 #Make mt vs n genes and umap wih mt perc
@@ -96,26 +97,27 @@ general_labs[general_labs != general_labs2] <- "ambiguous"
 general_labs[general_labs == "unassigned"] <- "ambiguous"
 myseur@meta.data$general_labs <- general_labs;
 inconsistent <- myseur@meta.data$scmap_cell_anno != myseur@meta.data$scmap_cluster_anno;
-myseur@meta.data$consistent_labs <- myseur@meta.data$scmap_cell_anno;
-myseur@meta.data$consistent_labs[inconsistent] <- general_labs[inconsistent]
-
-png(paste(NAME, "nFeatscatter.png", sep="_"), width=6, height=6, units="in", res=150)
-Seurat::FeatureScatter(myseur, feature1="nCount_RNA", feature2="nFeature_RNA")
-dev.off()
+myseur@meta.data$consistent_labs <- as.character(myseur@meta.data$scmap_cell_anno)
+myseur@meta.data$consistent_labs[inconsistent] <- as.character(general_labs[inconsistent])
 
 require("ggplot2")
 source("~/scripts/LiverMap2.0/Colour_Scheme.R")
 new_colour_scheme <- Cell_type_colours[order(Cell_type_colours[,1]),]
+
 myseur@meta.data$short_cluster_anno <- factor(map_cell_types(myseur@meta.data$consistent_labs), levels=new_colour_scheme[,1]);
+
 myseur@meta.data$short_marker_anno <- factor(map_cell_types(myseur@meta.data$marker_simplfied_anno), levels=new_colour_scheme[,1]);
-new_colour_scheme <- new_colour_scheme[new_colour_scheme[,1] %in% myseur@meta.data$shoart_cluster_anno,]
 
 print("plotting")
+
+tmp_colours <- new_colour_scheme[new_colour_scheme[,1] %in% myseur@meta.data$short_cluster_anno,]
 png(paste(NAME,"Autoanno.png", sep="_"), width=7.5, height=6, units="in", res=300)
-DimPlot(myseur, reduction="umap", group.by="short_cluster_anno", pt.size=.1)+scale_color_manual(values=new_colour_scheme[,2])#+annotate("text", x=umap_lab_pos[1,], y=umap_lab_pos[2,], label=lab_id, colour="grey35")
+DimPlot(myseur, reduction="umap", group.by="short_cluster_anno", pt.size=.1)+scale_color_manual(values=tmp_colours[,2])#+annotate("text", x=umap_lab_pos[1,], y=umap_lab_pos[2,], label=lab_id, colour="grey35")
 dev.off()
+
+tmp_colours <- new_colour_scheme[new_colour_scheme[,1] %in% myseur@meta.data$short_marker_anno,]
 png(paste(NAME,"Autoanno_marker.png", sep="_"), width=7.5, height=6, units="in", res=300)
-DimPlot(myseur, reduction="umap", group.by="short_marker_anno", pt.size=.1)+scale_color_manual(values=new_colour_scheme[,2])#+annotate("text", x=umap_lab_pos[1,], y=umap_lab_pos[2,], label=lab_id, colour="grey35")
+DimPlot(myseur, reduction="umap", group.by="short_marker_anno", pt.size=.1)+scale_color_manual(values=tmp_colours[,2])#+annotate("text", x=umap_lab_pos[1,], y=umap_lab_pos[2,], label=lab_id, colour="grey35")
 dev.off()
 
 
