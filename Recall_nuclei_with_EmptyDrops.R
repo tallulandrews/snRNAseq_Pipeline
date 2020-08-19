@@ -13,7 +13,7 @@ require(dplyr)
 require(Seurat)
 script_dir = "/cluster/home/tandrews/scripts/LiverMap2.0"
 
-args <- as.numeric(as.character(commandArgs(trailingOnly=TRUE)))
+args <- as.character(commandArgs(trailingOnly=TRUE))
 # FOLDER of raw data
 # NAME of project
 # max cells
@@ -33,10 +33,12 @@ if (length(args) < 4) {
 }
 
 FDR=0.01
-TRIM=10
+TRIM=10 # change this for dynamic trimming to avoid memory overflow. - no don't
+
+print(paste(FOLDER, NAME, MIN_CELLS, MAX_CELLS, FDR, TRIM, sep="\n"));
 
 # Read the raw matrix
-mydata <- Read10X(data.dir = paste(FOLDER, sep="/"))
+mydata <- Read10X(data.dir = FOLDER)
 # Remove rows & columns that are completely zero
 mydata <- mydata[,Matrix::colSums(mydata) > 0]
 mydata <- mydata[Matrix::rowSums(mydata) > 0,]
@@ -68,7 +70,7 @@ smooth_slope <- smooth.spline(slope, spar=0.5)
 inflection <- which(smooth_slope$y == min(smooth_slope$y[MIN_CELLS:MAX_CELLS]))
 my_inflection <- n_umi_sorted[inflection];
 
-
+#TRIM <- min(plausible_cell_threshold, mandatory_cell_threshold, my_inflection, br.out$total[br.out$inflection], br.out$total[br.out$knee])/10;
 
 
 if (br.out$knee > MIN_CELLS*10 || br.out$inflection > MIN_CELLS*10) {
@@ -170,10 +172,12 @@ my_background_correction <- function(sample_mat, is.cell) {
                 diff[diff < 0] <- 0
                 return(diff)
         }
-        corrected_mat <- apply(sample_mat[,is.cell], 2, correct_cell);
+        corrected_mat <- apply(sample_mat, 2, correct_cell);
         return(corrected_mat);
 }
 
+print(paste("My correction matrix dimensions:", dim(mydata), "input",c("gene","cells"), "of", NAME))
 
-out <- list(raw_mat=mydata, corrected=my_background_correction(mydata, is.cell), bg=my_background);
-saveRDS(out, paste(NAME, "emptyDrops.rds", sep="_"));
+saveRDS(mydata[,is.cell], paste(NAME, "emptyDrops_table.rds", sep="_"))
+saveRDS(my_background_correction(mydata[,is.cell], is.cell), paste(NAME, "emptyDrops_correctedtable.rds", sep="_"));
+saveRDS(my_background, paste(NAME, "background.rds", sep="_"))

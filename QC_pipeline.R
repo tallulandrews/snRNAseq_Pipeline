@@ -121,4 +121,4 @@ DimPlot(myseur, reduction="umap", group.by="short_marker_anno", pt.size=.1)+scal
 dev.off()
 
 
-saveRDS(myseur, paste(NAME,"SeurObj.rds"));
+saveRDS(myseur, paste(NAME,"SeurObj.rds", sep="-"));
