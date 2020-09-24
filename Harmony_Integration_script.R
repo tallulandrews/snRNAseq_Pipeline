@@ -3,7 +3,7 @@ source("../scripts/LiverMap2.0/Colour_Scheme.R")
 
 set.seed(3921)
 
-prefix ="SC_SN"
+prefix ="SN_SC"
 
 # Which do we include in the integrated map?
 dir <- "/cluster/projects/macparland/TA/LiverMap2.0/Cleaned"
@@ -115,7 +115,6 @@ merged_obj <- RunPCA(merged_obj, pc.genes = hvgs,
 			npcs = 20, verbose = FALSE)
 merged_obj <- RunUMAP(merged_obj, dims = 1:10, verbose = FALSE)
 
-make_umaps <- function(seur_obj, tag) {
 png(paste(prefix, "scaled_merged_not_integrated_tsne.png", sep="_"), width=9, height =6, units="in", res=300)
 DimPlot(merged_obj, reduction="tsne", group.by="sample", pt.size=0.1)
 dev.off();
