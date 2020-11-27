@@ -32,4 +32,8 @@ arrows(barplot_obj[1,], data[,1]*100,
 
 arrows(barplot_obj[2,], data[,2]*100, 
 	barplot_obj[2,], sn_top_errbar*100, angle=90, len=0.1)
+
+text(x=barplot_obj[1,], y=sc_top_errbar*100, round(data[,1]*100, digits=1), pos=3)
+text(x=barplot_obj[2,], y=sn_top_errbar*100, round(data[,2]*100, digits=1), pos=3)
+
 dev.off()
