@@ -3,21 +3,20 @@ source("~/scripts/LiverMap2.0/Colour_Scheme.R")
 
 set.seed(3921)
 
-prefix ="SN_SC"
+prefix ="SC"
 
 # Which do we include in the integrated map?
 dir <- "/cluster/projects/macparland/TA/LiverMap2.0/Cleaned"
 seurfiles <- c("C41_EmptyOnly.rds", 
-	"C41_CST_EmptyOnly.rds",
-	"C41_NST_EmptyOnly.rds",
-	"C41_TST_EmptyOnly.rds",
-	"C58_TST_EmptyOnly.rds",
 	"C58_RESEQ_EmptyOnly.rds",
-	"C70_TST_EmptyOnly.rds",
 	"C70_RESEQ_EmptyOnly.rds",
-	"C72_TST_EmptyOnly.rds",
 	"C72_RESEQ_EmptyOnly.rds"
 	);
+#seurfiles <- c("C41_SoupX.rds", 
+#	"C58_RESEQ_SoupX.rds",
+#	"C70_RESEQ_SoupX.rds",
+#	"C72_RESEQ_SoupX.rds"
+#	);
 
 samp_names <- unlist(lapply(strsplit(seurfiles, "_"), function(x){x <- x[c(-length(x))]; return(paste(x, collapse="_"))}))
 
@@ -112,25 +111,19 @@ merged_obj@meta.data$assay_type[nuclei] <- "single_nuc"
 
 saveRDS(merged_obj, paste(prefix, "merged_obj.rds", sep="_"))
 
-make_umaps <- function(seur_obj, tag, reduc="pca") {
+make_umaps <- function(seur_obj, tag) {
 	set.seed(9428)
 
 	seur_obj <- RunPCA(seur_obj, pc.genes = hvgs, 
 			npcs = 20, verbose = FALSE)
-	seur_obj <- RunUMAP(seur_obj, reduction=reduc, dims = 1:15, verbose = FALSE)
+	seur_obj <- RunUMAP(seur_obj, dims = 1:15, verbose = FALSE)
 
-	png(paste(prefix, tag, "sample_umap.png", sep="_"), width=9, height =6, units="in", res=300)
+	png(paste(prefix, tag, "umap.png", sep="_"), width=9, height =6, units="in", res=300)
 	print(DimPlot(seur_obj, reduction="umap", group.by="sample", pt.size=0.1))
 	dev.off();
-
-	png(paste(prefix, tag, "assay_umap.png", sep="_"), width=9, height =6, units="in", res=300)
-	print(DimPlot(seur_obj, reduction="umap", group.by="assay_type", pt.size=0.1))
-	dev.off();
-
 	png(paste(prefix, tag, "umap_mark_autoanno.png", sep="_"), width=12, height =6, units="in", res=300)
 	print(Type_DimPlot(seur_obj, reduction="umap", type_col="marker_labs", cluster_col="marker_labs"))
 	dev.off();
-
 	png(paste(prefix, tag, "umap_scmap_autoanno.png", sep="_"), width=12, height =6, units="in", res=300)
 	print(Type_DimPlot(seur_obj, reduction="umap", type_col="consistent_labs", cluster_col="marker_labs"))
 	dev.off();
@@ -149,14 +142,12 @@ obj <- make_umaps(obj, "rescaled")
 # harmony individually scaled
 require("harmony")
 set.seed(10131)
-merged_obj <- RunHarmony(merged_obj, c("sample"), plot_convergence = TRUE)
-merged_obj <- make_umaps(merged_obj, "indi_scaled_harmony", reduc="harmony")
+merged_obj <- RunHarmony(merged_obj, c("sample", "assay_type", "donor"), plot_convergence = TRUE)
+merged_obj <- make_umaps(merged_obj, "indi_scaled_harmony")
 saveRDS(merged_obj, paste(prefix, "universal_genes_harmony.rds", sep="_"));
 
 # harmony rescaled
 require("harmony")
 set.seed(10131)
-obj <- RunHarmony(obj, c("sample"), plot_convergence = TRUE)
-obj <- make_umaps(obj, "rescaled_harmony", reduc="harmony")
-
-
+obj <- RunHarmony(obj, c("sample", "assay_type", "donor"), plot_convergence = TRUE)
+obj <- make_umaps(obj, "rescaled_harmony")
