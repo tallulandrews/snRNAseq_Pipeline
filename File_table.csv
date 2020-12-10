@@ -1,0 +1,7 @@
+Sample,Raw_data
+C58_TST,/cluster/projects/macparland/TA/Single_Nuc/Healthy/C58
+C70_TST,/cluster/projects/macparland/TA/Single_Nuc/Healthy/C70_NUC_TST_3pr_v3/raw_feature_bc_matrix
+C72_TST,/cluster/projects/macparland/TA/Single_Nuc/Healthy/C72_NUC_TST_3pr_v3/raw_feature_bc_matrix
+C41_TST,/cluster/projects/macparland/TA/Single_Nuc/Healthy/SnRNA-seq_Data_C41/TST
+C41_CST,/cluster/projects/macparland/TA/Single_Nuc/Healthy/SnRNA-seq_Data_C41/CST
+C41_NST,/cluster/projects/macparland/TA/Single_Nuc/Healthy/SnRNA-seq_Data_C41/NST
